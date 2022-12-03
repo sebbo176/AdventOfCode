@@ -316,8 +316,8 @@ VHNwwNCVCChddfwHlWdnlnGRQPcQjRvMWBJJtMMWcvPJMM
 nGHNVHhnfnHDNhCfdhNNlwHvmpDrZDmpzmbZSZFsmmbqrrsz
 """
 
-let lowerCase = (97...122).map({Character(UnicodeScalar($0))})
-let upperCase = lowerCase.map( { Character($0.uppercased()) })
+let lowerCase = (97...122).map { Character(UnicodeScalar($0)) }
+let upperCase = lowerCase.map { Character($0.uppercased()) }
 let allLetters = lowerCase + upperCase
 
 struct Rucksack {
@@ -334,7 +334,7 @@ struct Rucksack {
 
     var duplicate: Character {
         for char in firstPart {
-            if let duplicate = lastPart.first(where: { $0 == char }) {
+            if let duplicate = lastPart.first(where: { $0 == char } ) {
                 return duplicate
             }
          }
@@ -348,8 +348,46 @@ struct Rucksack {
 
 func getDuplicateValue(data: String) -> Int {
     data.split(separator: "\n")
-        .map({ Rucksack(String($0)).valueOfDuplicate})
+        .map { Rucksack(String($0)).valueOfDuplicate }
         .reduce(0, +)
 }
 
 let partOne = getDuplicateValue(data: partOneData)
+
+struct Group {
+
+    init(_ participants: [String]) {
+        self.participants = participants
+    }
+
+    var participants: [String]
+
+    var duplicate: Character {
+        for char in participants[0] {
+            if let duplicateOne = participants[1].first(where: { $0 == char }),
+               participants[2].first(where: { $0 == char }) != nil {
+                return duplicateOne
+            }
+         }
+        fatalError()
+    }
+
+    var valueOfDuplicate: Int {
+        allLetters.firstIndex(of: duplicate)! + 1
+    }
+}
+
+func part2(data: String) -> Int {
+    let rows = data.split(separator: "\n")
+        .map({ String($0)})
+
+    let groupSize = 3
+    let groups = stride(from: 0, to: rows.count, by: groupSize).map {
+        Group(Array(rows[$0 ..< Swift.min($0 + groupSize, rows.count)]))
+    }
+    return groups
+        .map { $0.valueOfDuplicate }
+        .reduce(0, +)
+}
+
+let partTwo = part2(data: partOneData)
