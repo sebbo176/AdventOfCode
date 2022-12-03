@@ -12,26 +12,43 @@ ttgJtRGJQctTZtZT
 CrZsJsPPZsGzwwsLwLmpwMDw
 """
 
-extension String {
-    func split() -> [Substring] {
-        stride(from: 0, to: count, by: count / 2)
-            .map { self[self.index(self.startIndex, offsetBy: $0) ..< self.index(self.startIndex, offsetBy: min($0 + count / 2, self.count))] }
+let lowerCase = (97...122).map({Character(UnicodeScalar($0))})
+let upperCase = lowerCase.map( { Character($0.uppercased()) })
+let allLetters = lowerCase + upperCase
+
+struct Rucksack {
+    var firstPart: String
+    var lastPart: String
+
+    var duplicate: Character {
+        for char in firstPart {
+            if let duplicate = lastPart.first(where: { $0 == char }) {
+                return duplicate
+            }
+         }
+        fatalError()
+    }
+
+    var valueOfDuplicate: Int {
+        print(duplicate)
+        let value = allLetters.firstIndex(of: duplicate)!
+        print(value)
+        return value + 1 // 1 based count
     }
 }
 
-func findDuplicates(pair: [String]) {
-    let firstPart = pair.first!
-    let lastPart = pair.last!
+extension String {
+    func split() -> Rucksack {
+        let data = stride(from: 0, to: count, by: count / 2)
+            .map { self[self.index(self.startIndex, offsetBy: $0) ..< self.index(self.startIndex, offsetBy: min($0 + count / 2, self.count))] }
+        return Rucksack(firstPart: String(data[0]), lastPart: String(data[1]))
+    }
 }
 
-func getDuplicates(data: String) {
-    let rows = data.split(separator: "\n")
-        .map({ String($0)
-            .split()
-            .map({ String($0)})
-        })
-
-    findDuplicates(pair: rows.last!)
+func getDuplicateValue(data: String) -> Int {
+    data.split(separator: "\n")
+        .map({ String($0).split().valueOfDuplicate})
+        .reduce(0, +)
 }
 
-getDuplicates(data: sampleData)
+let partOne = getDuplicateValue(data: sampleData)
