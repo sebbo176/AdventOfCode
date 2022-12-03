@@ -19,9 +19,19 @@ extension String {
     }
 }
 
+func findDuplicates(pair: [String]) {
+    let firstPart = pair.first!
+    let lastPart = pair.last!
+}
+
 func getDuplicates(data: String) {
     let rows = data.split(separator: "\n")
-        .map({ String($0).split() })
+        .map({ String($0)
+            .split()
+            .map({ String($0)})
+        })
+
+    findDuplicates(pair: rows.last!)
 }
 
 getDuplicates(data: sampleData)
