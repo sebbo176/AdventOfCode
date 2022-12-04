@@ -1046,18 +1046,36 @@ struct Pair {
     var hasFullOverlap: Bool {
         firstElf.rangeToCleanAsSet.isSubset(of: secondElf.rangeToCleanAsSet) || secondElf.rangeToCleanAsSet.isSubset(of: firstElf.rangeToCleanAsSet)
     }
+
+    var hasOverlap: Bool {
+        var hasOverlap = false
+        firstElf.rangeToClean.forEach {
+            if secondElf.rangeToClean.contains($0) {
+                hasOverlap = true
+            }
+        }
+        return hasOverlap
+    }
 }
 
-func calculateFullOverlaps(data: String) -> Int {
+func calculateOverlaps(data: String, full: Bool) -> Int {
     data
         .split(separator: "\n")
         .map {
-            Pair(firstElf: Elf(String(String($0).split(separator: ",").first!)),
-                 secondElf: Elf(String(String($0).split(separator: ",").last!)))
-            .hasFullOverlap
+            if full {
+                return Pair(firstElf: Elf(String(String($0).split(separator: ",").first!)),
+                     secondElf: Elf(String(String($0).split(separator: ",").last!)))
+                .hasFullOverlap
+            } else {
+                return Pair(firstElf: Elf(String(String($0).split(separator: ",").first!)),
+                     secondElf: Elf(String(String($0).split(separator: ",").last!)))
+                .hasOverlap
+            }
         }
         .filter{$0}.count
 }
 
-let partOne = calculateFullOverlaps(data: partOneData)
+let partOne = calculateOverlaps(data: partOneData, full: true)
+
+let partTwo = calculateOverlaps(data: partOneData, full: false)
 
