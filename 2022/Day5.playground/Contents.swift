@@ -533,32 +533,10 @@ move 1 from 2 to 8
 
 struct Crate {
 
-//    init?(name: String) {
-//        guard name != " " else { return nil }
-//        self.name = name
-//    }
-
     let name: String
 }
 
 struct Column {
-
-//    init?(name: Int,
-//         cratesData: String) {
-//        var mutableCrateData = cratesData
-//        mutableCrateData = mutableCrateData
-//            .replacingOccurrences(of: "[", with: "")
-//            .replacingOccurrences(of: "]", with: "")
-//
-//
-//        let cratesToAdd = mutableCrateData
-//            .split(separator: " ")
-//            .map { String($0) }
-//            .compactMap { Crate(name: $0) }
-//        guard let cratesToAdd.count > 0 else { return nil }
-//        self.name = name
-//        self.crates = crates
-//    }
 
     let name: Int
     var crates: [Crate]
@@ -569,6 +547,15 @@ struct Column {
 
     mutating func add(crate: Crate) {
         crates.append(crate)
+        //        crates.insert(crate, at: crates.count)
+    }
+
+    mutating func addLast(crate: Crate) {
+        crates.insert(crate, at: 0)
+    }
+
+    mutating func takeLast() -> Crate {
+        crates.removeFirst()
     }
 }
 
@@ -581,12 +568,11 @@ struct Storage {
         mutableCrateData = mutableCrateData
             .replacingOccurrences(of: "[", with: " ")
             .replacingOccurrences(of: "]", with: " ")
-//        print(mutableCrateData)
         let cratesToAdd = mutableCrateData
             .map { String($0) }
 
         var counter = 0
-        let cratePositions = [1,5,9,13]
+        let cratePositions = [1,5,9,13,17,21,25,29,33]
         while counter < cratesToAdd.count {
             if cratePositions.contains(counter) {
                 if cratesToAdd[counter] == " " {
@@ -594,14 +580,11 @@ struct Storage {
                     continue
                 }
                 if columns.first(where: { $0.name == cratePositions.firstIndex(of: counter)!+1} ) == nil {
-//                    print("\(cratesToAdd[counter]), \(cratePositions.firstIndex(of: counter)!+1)")
                     let column = Column(name: cratePositions.firstIndex(of: counter)!+1, crates: [Crate(name: cratesToAdd[counter])])
-                    print("Added column \(cratePositions.firstIndex(of: counter)!+1), crate \(Crate(name: cratesToAdd[counter]))")
+//                    print("Added column \(cratePositions.firstIndex(of: counter)!+1), crate \(Crate(name: cratesToAdd[counter]))")
                     columns.append(column)
                 } else {
-//                    print("\(cratesToAdd[counter]), \(cratePositions.firstIndex(of: counter))")
                     add(crate: Crate(name: cratesToAdd[counter]), to: cratePositions.firstIndex(of: counter)!+1)
-//                    columns.first(where: { $0.name == counter+1})!.add(crate: Crate(name: cratesToAdd[counter]))
                 }
             }
             counter += 1
@@ -609,7 +592,7 @@ struct Storage {
     }
 
     mutating func add(crate: Crate, to: Int) {
-        print("Add \(crate.name) to \(to)")
+//        print("Add \(crate.name) to \(to)")
         var copy = columns.first(where: { $0.name == to})!
         copy.add(crate: crate)
 
@@ -617,6 +600,49 @@ struct Storage {
         columns.remove(at: indexPath)
         columns.insert(copy, at: indexPath)
     }
+
+    mutating func replaceColumn(oldColumnName: Int, newColumn: Column) {
+        let indexToRemove = columns.firstIndex(where: { $0.name == oldColumnName})!
+        columns.remove(at: indexToRemove)
+        columns.append(newColumn)
+    }
+}
+
+struct Action {
+
+    init(data: String) {
+        let values = data
+            .split(separator: " ")
+            .map { String($0) }
+        self.count = Int(values[1])!
+        self.from = Int(values[3])!
+        self.to = Int(values[5])!
+    }
+
+    let from: Int
+    let to: Int
+    let count: Int
+}
+
+
+func perform(actions: [Action], on storage: Storage) -> Storage {
+    var mutableCopy = storage
+    actions.forEach { action in
+        print("action, move \(action.count) from \(action.from) to \(action.to)")
+
+        for _ in 1...action.count {
+            var fromColumn = mutableCopy.columns.first(where: {$0.name == action.from})!
+            var crateToMove = fromColumn.takeLast()
+            mutableCopy.replaceColumn(oldColumnName: fromColumn.name, newColumn: fromColumn)
+
+            var toColumn = mutableCopy.columns.first(where: {$0.name == action.to})!
+            toColumn.addLast(crate: crateToMove)
+            mutableCopy.replaceColumn(oldColumnName: toColumn.name, newColumn: toColumn)
+            print("\(fromColumn.name) lost \(crateToMove.name). Moved to\(toColumn.name)")
+        }
+    }
+
+    return mutableCopy
 }
 
 
@@ -631,17 +657,21 @@ func fillColumns(data: String) -> String {
     var storage = Storage(columns: [])
     while currentRow.contains("[") {
         currentRow = rows[counter]
-//        print(currentRow)
         counter += 1
         if !currentRow.contains("[") { break }
         storage.add(cratesData: currentRow)
     }
-    print(storage.columns.first!.crates.first!.name)
-    print(storage.columns.count)
-    return storage.columns.sorted(by: {$0.name < $1.name })
+
+    let actions = data.split(separator: "\n\n")
+        .last!
+        .split(separator: "\n")
+        .map { Action(data: String($0)) }
+
+    let afterReorder = perform(actions: actions, on: storage)
+
+    return afterReorder.columns.sorted(by: {$0.name < $1.name })
         .map { $0.topCrate.name }
         .joined()
 }
 
 fillColumns(data: sampleData)
-// VVRHBGDW is wrong
