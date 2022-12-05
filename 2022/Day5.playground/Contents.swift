@@ -547,15 +547,24 @@ struct Column {
 
     mutating func add(crate: Crate) {
         crates.append(crate)
-        //        crates.insert(crate, at: crates.count)
     }
 
     mutating func addLast(crate: Crate) {
         crates.insert(crate, at: 0)
     }
 
+    mutating func addLast(crates: [Crate]) {
+        self.crates.insert(contentsOf: crates, at: 0)
+    }
+
     mutating func takeLast() -> Crate {
         crates.removeFirst()
+    }
+
+    mutating func take(_ count: Int) -> [Crate] {
+        var cratesToMove = Array(crates[0...count-1])
+        crates.removeFirst(count)
+        return cratesToMove
     }
 }
 
@@ -581,7 +590,6 @@ struct Storage {
                 }
                 if columns.first(where: { $0.name == cratePositions.firstIndex(of: counter)!+1} ) == nil {
                     let column = Column(name: cratePositions.firstIndex(of: counter)!+1, crates: [Crate(name: cratesToAdd[counter])])
-//                    print("Added column \(cratePositions.firstIndex(of: counter)!+1), crate \(Crate(name: cratesToAdd[counter]))")
                     columns.append(column)
                 } else {
                     add(crate: Crate(name: cratesToAdd[counter]), to: cratePositions.firstIndex(of: counter)!+1)
@@ -592,7 +600,6 @@ struct Storage {
     }
 
     mutating func add(crate: Crate, to: Int) {
-//        print("Add \(crate.name) to \(to)")
         var copy = columns.first(where: { $0.name == to})!
         copy.add(crate: crate)
 
@@ -628,8 +635,6 @@ struct Action {
 func perform(actions: [Action], on storage: Storage) -> Storage {
     var mutableCopy = storage
     actions.forEach { action in
-        print("action, move \(action.count) from \(action.from) to \(action.to)")
-
         for _ in 1...action.count {
             var fromColumn = mutableCopy.columns.first(where: {$0.name == action.from})!
             var crateToMove = fromColumn.takeLast()
@@ -638,13 +643,24 @@ func perform(actions: [Action], on storage: Storage) -> Storage {
             var toColumn = mutableCopy.columns.first(where: {$0.name == action.to})!
             toColumn.addLast(crate: crateToMove)
             mutableCopy.replaceColumn(oldColumnName: toColumn.name, newColumn: toColumn)
-            print("\(fromColumn.name) lost \(crateToMove.name). Moved to\(toColumn.name)")
         }
     }
-
     return mutableCopy
 }
 
+
+func perform9001(actions: [Action], on storage: Storage) -> Storage {
+    var mutableCopy = storage
+    actions.forEach { action in
+        var fromColumn = mutableCopy.columns.first(where: {$0.name == action.from})!
+        var cratesToMove = fromColumn.take(action.count)
+        mutableCopy.replaceColumn(oldColumnName: fromColumn.name, newColumn: fromColumn)
+        var toColumn = mutableCopy.columns.first(where: {$0.name == action.to})!
+        toColumn.addLast(crates: cratesToMove)
+        mutableCopy.replaceColumn(oldColumnName: toColumn.name, newColumn: toColumn)
+    }
+    return mutableCopy
+}
 
 
 func fillColumns(data: String) -> String {
@@ -667,11 +683,11 @@ func fillColumns(data: String) -> String {
         .split(separator: "\n")
         .map { Action(data: String($0)) }
 
-    let afterReorder = perform(actions: actions, on: storage)
+    let afterReorder = perform9001(actions: actions, on: storage)
 
     return afterReorder.columns.sorted(by: {$0.name < $1.name })
         .map { $0.topCrate.name }
         .joined()
 }
 
-fillColumns(data: sampleData)
+fillColumns(data: partOneData)
