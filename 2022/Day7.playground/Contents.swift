@@ -75,7 +75,7 @@ class Folder {
         folder.append(contentsOf: folders)
 
         for index in 0..<folders.count {
-             folders[index].subFolders(folder: &folder)
+            folders[index].subFolders(folder: &folder)
         }
     }
 
@@ -97,7 +97,11 @@ class HardDrive {
 
     var disk: Folder
 
-    var currentFolder: Folder
+    var currentFolder: Folder {
+        didSet {
+            print("Current folder changed to \(currentFolder.name)")
+        }
+    }
 
     func navigateTo(path: String)  {
         let pathDetails = path
@@ -105,21 +109,16 @@ class HardDrive {
             .map { String($0) }
 
         if pathDetails.count == 1 {
-            self.currentFolder = disk
+            currentFolder = disk
+            return
         }
-        var folder: Folder!
-        var currentFolder = disk
         pathDetails.forEach { subPath in
             print(subPath)
-            if subPath != "root" {
-                if let foundFolder = currentFolder.folders.first(where: { $0.name == subPath }) {
-                    folder = foundFolder
-                }
-            } else {
-                folder = disk
+            if let foundFolder = self.currentFolder.folders.first(where: { $0.name == subPath }) {
+                print("Found folder \(foundFolder.name)")
+                self.currentFolder = foundFolder
             }
         }
-        self.currentFolder = folder
     }
 }
 
@@ -193,6 +192,7 @@ func loadHdd(input: String) {
             while (!commands[index].isUserInput) {
                 if commands[index].isFile {
                     hardDrive.currentFolder.add(file: File(input: commands[index].command))
+                    print("In folder \(hardDrive.currentFolder.name)")
                 }
                 if commands[index].isFolder {
                     hardDrive.currentFolder.add(folder: Folder(input: commands[index].command, path: "\(hardDrive.currentFolder.name)/\(commands[index].command.split(separator: " ").last!)"))
@@ -212,8 +212,8 @@ func loadHdd(input: String) {
             var editPath = path.split(separator: "/").map { String($0) }
             let removed = editPath.removeLast()
             path = editPath.joined(separator: "/")
-                print("Go up one folder to: \(path)")
-                hardDrive.navigateTo(path: path)
+            print("Go up one folder to: \(path)")
+            hardDrive.navigateTo(path: path)
         }
     }
 
@@ -223,6 +223,7 @@ func loadHdd(input: String) {
     hardDrive.disk.subFolders(folder: &allFolders)
 
     allFolders.removeAll(where: { $0.totalSizeOfFiles > 100000 } )
+    allFolders.first?.totalSizeOfFiles
     let bigFolder = allFolders
         .map { $0.totalSizeOfFiles }
         .reduce(0, +)
