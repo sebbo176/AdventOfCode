@@ -110,16 +110,17 @@ class HardDrive {
         var folder: Folder!
         var currentFolder = disk
         pathDetails.forEach { subPath in
+            print(subPath)
             if subPath != "root" {
-                folder = currentFolder.folders.first(where: { $0.name == subPath })!
-                currentFolder = currentFolder
+                if let foundFolder = currentFolder.folders.first(where: { $0.name == subPath }) {
+                    folder = foundFolder
+                }
             } else {
                 folder = disk
             }
         }
         self.currentFolder = folder
     }
-
 }
 
 struct Command {
@@ -191,10 +192,10 @@ func loadHdd(input: String) {
             var index = i + 1
             while (!commands[index].isUserInput) {
                 if commands[index].isFile {
-                    hardDrive.disk.add(file: File(input: commands[index].command))
+                    hardDrive.currentFolder.add(file: File(input: commands[index].command))
                 }
                 if commands[index].isFolder {
-                    hardDrive.disk.add(folder: Folder(input: commands[index].command, path: "\(hardDrive.currentFolder.name)/\(commands[index].command.split(separator: " ").last!)"))
+                    hardDrive.currentFolder.add(folder: Folder(input: commands[index].command, path: "\(hardDrive.currentFolder.name)/\(commands[index].command.split(separator: " ").last!)"))
                 }
                 index += 1
                 if index == commands.count { break }
@@ -217,13 +218,15 @@ func loadHdd(input: String) {
     }
 
 
+
     var allFolders: [Folder] = [hardDrive.disk]
     hardDrive.disk.subFolders(folder: &allFolders)
 
     allFolders.removeAll(where: { $0.totalSizeOfFiles > 100000 } )
     let bigFolder = allFolders
-        .map { $0.name }
-//        .reduce(0, +)
+        .map { $0.totalSizeOfFiles }
+        .reduce(0, +)
+    print(bigFolder)
 }
 
 loadHdd(input: sampleData)
