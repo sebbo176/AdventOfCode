@@ -1135,31 +1135,59 @@ class Folder {
             .map { String($0)}
         self.name = data.last!
         self.path = path
-        print("Created Folder \(name)")
+        print("Created Folder \(name) at \(path)")
     }
 
     let name: String
     let path: String
     var files: [File] = []
     var folders: [Folder] = []
+    private var cachedTotalSizeWithSubFolders = 0 {
+        didSet {
+            if cachedTotalSizeWithSubFolders == 0 { return }
+            print("cachedTotalSizeWithSubFolders for \(name) is: \(cachedTotalSizeWithSubFolders). cachedTotalSizeOfFiles is \(cachedTotalSizeOfFiles)")
+        }
+    }
+    private var cachedTotalSizeOfFiles = 0
 
     var totalSizeOfFiles: Int {
-        files
+        if cachedTotalSizeOfFiles != 0 {
+            return cachedTotalSizeOfFiles
+        }
+
+        cachedTotalSizeOfFiles = files
             .map { $0.size }
             .reduce(0, +)
+        return cachedTotalSizeOfFiles
     }
 
     func totalSizeWithSubFolders() -> Int {
-        if folders.count == 0 {
+
+        if name == "rdmgrtzl" {
+            print("rdmgrtzl folders: \(folders.count), files: \(files.count). cachedTotalSizeWithSubFolders: \(cachedTotalSizeWithSubFolders). Path \(path)")
+            print(folders.map( { $0.name}).joined(separator: ","))
+        }
+
+        if cachedTotalSizeWithSubFolders != 0 {
+            return cachedTotalSizeWithSubFolders
+        }
+
+        if self.folders.count == 0 {
             return totalSizeOfFiles
         }
 
-        var subFolders: [Folder] = []
+        var subFolders: [Folder] = folders
         self.subFolders(folder: &subFolders)
 
-        let subfolderSize = subFolders
-            .map { $0.totalSizeWithSubFolders() }
-            .reduce(0, +)
+//        let subfolderSize = subFolders
+//            .map { $0.totalSizeWithSubFolders() }
+//            .reduce(0, +)
+
+        var subfolderSize = 0
+        for index in 0..<folders.count {
+            subfolderSize += folders[index].totalSizeWithSubFolders()
+        }
+        cachedTotalSizeWithSubFolders = subfolderSize + totalSizeOfFiles
         return subfolderSize + totalSizeOfFiles
     }
 
@@ -1167,7 +1195,6 @@ class Folder {
         folder.append(contentsOf: self.folders)
 
         for index in 0..<folders.count {
-            print("working on folder \(folders[index].name)")
             folders[index].subFolders(folder: &folder)
         }
     }
@@ -1205,6 +1232,8 @@ class HardDrive {
             currentFolder = disk
             return
         }
+        self.currentFolder = self.disk
+
         pathDetails.forEach { subPath in
             print(subPath)
             if let foundFolder = self.currentFolder.folders.first(where: { $0.name == subPath }) {
@@ -1314,18 +1343,26 @@ func loadHdd(input: String) {
 
     var allFolders: [Folder] = [hardDrive.disk]
     hardDrive.disk.subFolders(folder: &allFolders)
-//
-//    allFolders.forEach { folder in
-//        if folder.totalSizeWithSubFolders() <= 100000 && folder.totalSizeWithSubFolders() != 0 && folder.totalSizeOfFiles <= 100000  {
-//            print("Folder: \(folder.name). Total size of files: \(folder.totalSizeOfFiles). Total size of files with subfolders: \(folder.totalSizeWithSubFolders())")
-//        }
-//    }
+
+
+    allFolders.forEach { folder in
+        if folder.totalSizeWithSubFolders() <= 100000 && folder.totalSizeWithSubFolders() != 0 /* && folder.totalSizeOfFiles <= 100000 */  {
+            print("Folder: \(folder.name). Total size of files: \(folder.totalSizeOfFiles). Total size of files with subfolders: \(folder.totalSizeWithSubFolders())")
+        }
+    }
     let smallFolder = allFolders
-        .map { ($0.totalSizeWithSubFolders() <= 100000) && ($0.totalSizeOfFiles <= 100000) ? $0.totalSizeWithSubFolders() : 0 }
+        .compactMap { folder in
+            let totalSizeWithSubFolders = folder.totalSizeWithSubFolders()
+            let insideLimit = (totalSizeWithSubFolders <= 100000) //&& (folder.totalSizeOfFiles <= 100000)
+            if insideLimit {
+                return totalSizeWithSubFolders
+            } else {
+                return nil
+            }
+        }
     print(smallFolder.reduce(0, +))
 
 }
 
 loadHdd(input: realData)
-//216126945 to high
-//3240552 to high
+
