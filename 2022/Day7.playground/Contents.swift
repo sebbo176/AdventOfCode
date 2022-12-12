@@ -1179,10 +1179,6 @@ class Folder {
         var subFolders: [Folder] = folders
         self.subFolders(folder: &subFolders)
 
-//        let subfolderSize = subFolders
-//            .map { $0.totalSizeWithSubFolders() }
-//            .reduce(0, +)
-
         var subfolderSize = 0
         for index in 0..<folders.count {
             subfolderSize += folders[index].totalSizeWithSubFolders()
@@ -1339,29 +1335,17 @@ func loadHdd(input: String) {
         }
     }
 
-
-
     var allFolders: [Folder] = [hardDrive.disk]
     hardDrive.disk.subFolders(folder: &allFolders)
 
-
     allFolders.forEach { folder in
-        if folder.totalSizeWithSubFolders() <= 100000 && folder.totalSizeWithSubFolders() != 0 /* && folder.totalSizeOfFiles <= 100000 */  {
+        if folder.totalSizeWithSubFolders() <= 100000 && folder.totalSizeWithSubFolders() != 0  {
             print("Folder: \(folder.name). Total size of files: \(folder.totalSizeOfFiles). Total size of files with subfolders: \(folder.totalSizeWithSubFolders())")
         }
     }
     let smallFolder = allFolders
-        .compactMap { folder in
-            let totalSizeWithSubFolders = folder.totalSizeWithSubFolders()
-            let insideLimit = (totalSizeWithSubFolders <= 100000) //&& (folder.totalSizeOfFiles <= 100000)
-            if insideLimit {
-                return totalSizeWithSubFolders
-            } else {
-                return nil
-            }
-        }
+        .compactMap { $0.totalSizeWithSubFolders() <= 100000 ? $0.totalSizeWithSubFolders() : nil }
     print(smallFolder.reduce(0, +))
-
 }
 
 loadHdd(input: realData)
