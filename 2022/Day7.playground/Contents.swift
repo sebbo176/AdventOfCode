@@ -1163,11 +1163,6 @@ class Folder {
 
     func totalSizeWithSubFolders() -> Int {
 
-        if name == "rdmgrtzl" {
-            print("rdmgrtzl folders: \(folders.count), files: \(files.count). cachedTotalSizeWithSubFolders: \(cachedTotalSizeWithSubFolders). Path \(path)")
-            print(folders.map( { $0.name}).joined(separator: ","))
-        }
-
         if cachedTotalSizeWithSubFolders != 0 {
             return cachedTotalSizeWithSubFolders
         }
@@ -1350,3 +1345,58 @@ func loadHdd(input: String) {
 
 loadHdd(input: realData)
 
+func loadHddPart2(input: String) {
+
+    var root = Folder(name: "root", path: "root")
+    var hardDrive = HardDrive(disk: root)
+
+    let commands = input
+        .split(separator: "\n")
+        .map { String($0) }
+        .map { Command(command: $0 ) }
+    var path = root.path
+    for i in 0...commands.count - 1 {
+        print(i)
+        if commands[i].isListFiles {
+            print("is list file")
+            var index = i + 1
+            while (!commands[index].isUserInput) {
+                if commands[index].isFile {
+                    hardDrive.currentFolder.add(file: File(input: commands[index].command))
+                    print("In folder \(hardDrive.currentFolder.name)")
+                }
+                if commands[index].isFolder {
+                    hardDrive.currentFolder.add(folder: Folder(input: commands[index].command, path: "\(hardDrive.currentFolder.name)/\(commands[index].command.split(separator: " ").last!)"))
+                }
+                index += 1
+                if index == commands.count { break }
+            }
+        }
+
+        if let changeFolderTo = commands[i].isChangeDirectory {
+            path += "/\(changeFolderTo)"
+            print("change folder to: \(path)")
+            hardDrive.navigateTo(path: path)
+        }
+
+        if commands[i].isGoUpOneLevel {
+            var editPath = path.split(separator: "/").map { String($0) }
+            let removed = editPath.removeLast()
+            path = editPath.joined(separator: "/")
+            print("Go up one folder to: \(path)")
+            hardDrive.navigateTo(path: path)
+        }
+    }
+
+    var allFolders: [Folder] = [hardDrive.disk]
+    hardDrive.disk.subFolders(folder: &allFolders)
+    let freeSize = 70000000 - hardDrive.disk.totalSizeWithSubFolders()
+    let spaceNeeded = 30000000 - freeSize
+
+    let smallFolder = allFolders
+        .compactMap { $0.totalSizeWithSubFolders() >= spaceNeeded ? $0 : nil }
+        .sorted(by: { $0.totalSizeWithSubFolders() <= $1.totalSizeWithSubFolders()} )
+    print(smallFolder.first!.totalSizeWithSubFolders())
+}
+
+loadHddPart2(input: realData)
