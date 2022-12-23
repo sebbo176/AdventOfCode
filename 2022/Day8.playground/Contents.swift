@@ -114,11 +114,6 @@ let realData =
 012221120210002201233041204141124034134123443133233422423453224352410321301023102020300131022311221
 """
 
-//protocol dataEntity {
-//
-//    var depth: Int { get }
-//    var position: Int { set }
-//}
 
 class Column {
 
@@ -131,19 +126,31 @@ class Column {
     var position: Int
 }
 
+class Tree: Hashable {
+
+    init(x: Int, y: Int) {
+        self.x = x
+        self.y = y
+    }
+
+    var x: Int
+    var y: Int
+
+    static func == (lhs: Tree, rhs: Tree) -> Bool {
+        lhs.x == rhs.x && lhs.y == rhs.y
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine("\(x)\(y)")
+    }
+}
+
+var visibleTrees: Set<Tree> = []
+
 public extension String {
     var charactersArray: [Character] {
         Array(self)
     }
-}
-
-func stripFirstAndLastAndSum(array: [Column]) -> Int {
-    var copy = array
-    copy.removeLast()
-    copy.removeFirst()
-    return copy
-        .map {$0.depth }
-        .reduce(0, +)
 }
 
 func load(data: String) {
@@ -160,15 +167,28 @@ func load(data: String) {
     // TOP
     var topRow: [Column] = []
     for index in 0..<rowsValues[0].count {
+//        print("===========================")
+
         var position = index
         var depth = 1
         var value = rowsValues[0][index]
         var valueOneBelow = rowsValues[depth][index]
-
-        while value < valueOneBelow {
+        var highestTree = value
+//        print("highestTree: \(highestTree), depth: \(depth)")
+        visibleTrees.insert(Tree(x: position, y: 0))
+//        print("x: \(position) y: \(0)")
+        var counter = 0
+        while highestTree < 9 && counter < rowsValues.count-1 {
             value = valueOneBelow
-            depth += 1
-            valueOneBelow = rowsValues[depth][index]
+            if value > highestTree {
+                visibleTrees.insert(Tree(x: position, y: counter == 0 ? 1 : counter))
+                depth += 1
+                highestTree = value
+//                print("highestTree: \(highestTree), depth: \(depth)")
+//                print("x: \(position) y: \(counter == 0 ? 1 : counter)")
+            }
+            counter += 1
+            valueOneBelow = rowsValues[counter][index]
         }
         topRow.append(Column(depth: depth, position: position))
     }
@@ -176,15 +196,30 @@ func load(data: String) {
     // BOTTOM
     var bottomRow: [Column] = []
     for index in 0..<rowsValues[rowsValues.count-1].count {
+//        print("===========================")
+
         var position = index
         var depth = 1
         var value = rowsValues[rowsValues.count-1][index]
-        var valueOneBelow = rowsValues[depth][index]
+        var valueOneBelow = rowsValues[rowsValues.count-1-1][index]
+        var highestTree = value
+//        print("highestTree: \(highestTree), depth: \(depth)")
+        visibleTrees.insert(Tree(x: index, y: rowsValues.count-1))
+//        print("x: \(position) y: \(rowsValues.count-1)")
 
-        while value < valueOneBelow {
+        var counter = 0
+        while highestTree < 9 && counter < rowsValues.count-1 {
             value = valueOneBelow
-            depth += 1
-            valueOneBelow = rowsValues[rowsValues.count-1-depth][index]
+            if value > highestTree {
+                depth += 1
+                visibleTrees.insert(Tree(x: index, y: counter == 0 ?  rowsValues.count-2 : rowsValues.count-1-counter))
+                highestTree = value
+//                print("highestTree: \(highestTree), depth: \(depth)")
+//                print("x: \(position) y: \(counter == 0 ?  rowsValues.count-2 : rowsValues.count-1-counter)")
+            }
+            counter += 1
+            valueOneBelow = rowsValues[rowsValues.count - (1 + counter)][index]
+//            print("ValueOneBelow changed to \(valueOneBelow)")
         }
         bottomRow.append(Column(depth: depth, position: position))
     }
@@ -192,15 +227,31 @@ func load(data: String) {
     // LEADING
     var leadingColumn: [Column] = []
     for index in 0..<rowsValues.count {
+//        print("===========================")
+
         var position = index
         var depth = 1
         var value = rowsValues[index][0]
-        var valueOneBelow = rowsValues[index][depth]
+        var valueOneBelow = rowsValues[index][1]
+        var highestTree = value
+//        print("highestTree: \(highestTree), depth: \(depth)")
+        visibleTrees.insert(Tree(x: 0, y: index))
+//        print("x: \(0) y: \(index)")
 
-        while value < valueOneBelow {
+
+        var counter = 0
+        while highestTree < 9 && counter < rowsValues.count-1 {
             value = valueOneBelow
-            depth += 1
-            valueOneBelow = rowsValues[index][depth]
+            if value > highestTree {
+                depth += 1
+                visibleTrees.insert(Tree(x: counter == 0 ? 1 : counter, y: index))
+                highestTree = value
+//                print("highestTree: \(highestTree), depth: \(depth)")
+//                print("x: \(counter == 0 ? 1 : counter) y: \(index)")
+
+            }
+            counter += 1
+            valueOneBelow = rowsValues[index][counter]
         }
         leadingColumn.append(Column(depth: depth, position: position))
     }
@@ -208,25 +259,40 @@ func load(data: String) {
     // Trailing
     var trailingColumn: [Column] = []
     for index in 0..<rowsValues.count {
+        print("===========================")
+
         var position = index
         var depth = 1
         var value = rowsValues[index][rowsValues.count-1]
         var valueOneBelow = rowsValues[index][rowsValues.count-1-depth]
+        var highestTree = value
+        print("highestTree: \(highestTree), depth: \(depth)")
+        visibleTrees.insert(Tree(x: rowsValues.count-1, y: index))
+        print("x: \(rowsValues.count-1) y: \(index)")
 
-        while value < valueOneBelow {
+        var counter = 0
+        while highestTree < 9 && counter < rowsValues.count-1 {
             value = valueOneBelow
-            depth += 1
-            valueOneBelow = rowsValues[index][rowsValues.count-1-depth]
+            if value > highestTree {
+                depth += 1
+                visibleTrees.insert(Tree(x: counter == 0 ? rowsValues.count-2 : rowsValues.count-1-counter, y: index))
+                highestTree = value
+                print("highestTree: \(highestTree), depth: \(depth)")
+                print("x: \(counter == 0 ? rowsValues.count-2 : rowsValues.count-1-counter) y: \(index)")
+            }
+            counter += 1
+            valueOneBelow = rowsValues[index][rowsValues.count-1-counter]
         }
         trailingColumn.append(Column(depth: depth, position: position))
     }
 
-    let topDepth = stripFirstAndLastAndSum(array: topRow)
-    let bottomDepth = stripFirstAndLastAndSum(array: bottomRow)
-    let leadingDepth = stripFirstAndLastAndSum(array: leadingColumn)
-    let trailingDepth = stripFirstAndLastAndSum(array: trailingColumn)
-    print(topDepth + bottomDepth + leadingDepth + trailingDepth + 4)
+    visibleTrees.sorted { lhs, rhs in
+        lhs.x < rhs.x
+    }.forEach {
+        print("x: \($0.x) y: \($0.y)")
+    }
+    print(visibleTrees.count)
 }
 
 load(data: realData)
-//597 is too low
+
