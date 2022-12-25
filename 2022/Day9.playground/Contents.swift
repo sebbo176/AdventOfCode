@@ -2018,4 +2018,46 @@ L 5
 R 2
 """
 
+enum Direction {
 
+    case up
+    case down
+    case right
+    case left
+}
+
+extension String {
+
+    func toDirection() -> Direction {
+        if self == "U" { return .up }
+        if self == "D" { return .down }
+        if self == "R" { return .right }
+        if self == "L" { return .left }
+        fatalError()
+    }
+}
+
+struct Move {
+
+    init(row: String) {
+        let data = row
+            .split(separator: " ")
+            .map { String($0) }
+        direction = data[0].toDirection()
+        value = Int(data[1])!
+    }
+
+    let direction: Direction
+    let value: Int
+}
+
+func parse(_ input: String) {
+
+    input
+        .split(separator: "\n")
+        .map { String($0) }
+        .map { Move(row: $0) }
+        
+}
+
+parse(sampleData)
