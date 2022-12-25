@@ -145,6 +145,19 @@ class Tree: Hashable {
     }
 }
 
+class PartTwoTree {
+
+    init(value: Int, x: Int, y: Int) {
+        self.value = value
+        self.x = x
+        self.y = y
+    }
+
+    var value: Int
+    var x: Int
+    var y: Int
+}
+
 var visibleTrees: Set<Tree> = []
 
 public extension String {
@@ -153,7 +166,7 @@ public extension String {
     }
 }
 
-func load(data: String) {
+func loadPartOne(data: String) {
 
     let rows = data
         .split(separator: "\n")
@@ -259,16 +272,16 @@ func load(data: String) {
     // Trailing
     var trailingColumn: [Column] = []
     for index in 0..<rowsValues.count {
-        print("===========================")
+//        print("===========================")
 
         var position = index
         var depth = 1
         var value = rowsValues[index][rowsValues.count-1]
         var valueOneBelow = rowsValues[index][rowsValues.count-1-depth]
         var highestTree = value
-        print("highestTree: \(highestTree), depth: \(depth)")
+//        print("highestTree: \(highestTree), depth: \(depth)")
         visibleTrees.insert(Tree(x: rowsValues.count-1, y: index))
-        print("x: \(rowsValues.count-1) y: \(index)")
+//        print("x: \(rowsValues.count-1) y: \(index)")
 
         var counter = 0
         while highestTree < 9 && counter < rowsValues.count-1 {
@@ -277,8 +290,8 @@ func load(data: String) {
                 depth += 1
                 visibleTrees.insert(Tree(x: counter == 0 ? rowsValues.count-2 : rowsValues.count-1-counter, y: index))
                 highestTree = value
-                print("highestTree: \(highestTree), depth: \(depth)")
-                print("x: \(counter == 0 ? rowsValues.count-2 : rowsValues.count-1-counter) y: \(index)")
+//                print("highestTree: \(highestTree), depth: \(depth)")
+//                print("x: \(counter == 0 ? rowsValues.count-2 : rowsValues.count-1-counter) y: \(index)")
             }
             counter += 1
             valueOneBelow = rowsValues[index][rowsValues.count-1-counter]
@@ -294,5 +307,141 @@ func load(data: String) {
     print(visibleTrees.count)
 }
 
-load(data: realData)
+//loadPartOne(data: realData)
 
+func treeAbove(tree: PartTwoTree, forrest: [PartTwoTree]) -> PartTwoTree? {
+    forrest.first(where: { $0.y == (tree.y - 1) && $0.x == tree.x })
+}
+
+func treeBelow(tree: PartTwoTree, forrest: [PartTwoTree]) -> PartTwoTree? {
+    forrest.first(where: { $0.y == (tree.y + 1) && $0.x == tree.x })
+}
+
+func treeRight(tree: PartTwoTree, forrest: [PartTwoTree]) -> PartTwoTree? {
+    forrest.first(where: { $0.y == tree.y && $0.x == (tree.x + 1) })
+}
+
+func treeLeft(tree: PartTwoTree, forrest: [PartTwoTree]) -> PartTwoTree? {
+    forrest.first(where: { $0.y == tree.y && $0.x == (tree.x - 1) })
+}
+
+
+func numberOfLowerTreesAbove(tree: PartTwoTree, forrest: [PartTwoTree]) -> Int {
+
+    var startTree = tree
+    var currentTreeAbove = treeAbove(tree: startTree, forrest: forrest)
+    var numberOfHigherTreesAbove = 0
+
+    while currentTreeAbove != nil {
+        numberOfHigherTreesAbove += 1
+
+        guard currentTreeAbove!.value < startTree.value else {
+            break
+        }
+        var nextCurrentTreeAbove = treeAbove(tree: currentTreeAbove!, forrest: forrest)
+        currentTreeAbove = nextCurrentTreeAbove
+    }
+
+    return numberOfHigherTreesAbove
+}
+
+func numberOfLowerTreesBelow(tree: PartTwoTree, forrest: [PartTwoTree]) -> Int {
+
+    var startTree = tree
+    var currentTreeBelow = treeBelow(tree: startTree, forrest: forrest)
+    var numberOfHigherTreesAbove = 0
+
+    while currentTreeBelow != nil {
+        numberOfHigherTreesAbove += 1
+//        print("Current value: \(currentTreeBelow!.value) Start Value: \(startTree.value)")
+        guard currentTreeBelow!.value < startTree.value else {
+//            print("break")
+            break
+        }
+        var nextCurrentTreeBelow = treeBelow(tree: currentTreeBelow!, forrest: forrest)
+//        print(nextCurrentTreeBelow?.value ?? "NO TREE")
+        currentTreeBelow = nextCurrentTreeBelow
+    }
+
+    return numberOfHigherTreesAbove
+}
+
+func numberOfLowerTreesRight(tree: PartTwoTree, forrest: [PartTwoTree]) -> Int {
+
+    var startTree = tree
+    var currentTreeRight = treeRight(tree: startTree, forrest: forrest)
+    var numberOfHigherTreesAbove = 0
+
+    while currentTreeRight != nil {
+        numberOfHigherTreesAbove += 1
+//        print("Current value: \(currentTreeBelow!.value) Start Value: \(startTree.value)")
+        guard currentTreeRight!.value < startTree.value else {
+            break
+        }
+        var nextCurrentTreeRight = treeRight(tree: currentTreeRight!, forrest: forrest)
+        currentTreeRight = nextCurrentTreeRight
+    }
+
+    return numberOfHigherTreesAbove
+}
+
+func numberOfLowerTreesLeft(tree: PartTwoTree, forrest: [PartTwoTree]) -> Int {
+
+    var startTree = tree
+    var currentTreeLeft = treeLeft(tree: startTree, forrest: forrest)
+    var numberOfHigherTreesAbove = 0
+
+    while currentTreeLeft != nil {
+        numberOfHigherTreesAbove += 1
+//        print("Current value: \(currentTreeLeft!.value) Start Value: \(startTree.value)")
+        guard currentTreeLeft!.value < startTree.value else {
+            break
+        }
+        var nextCurrentTreeLeft = treeLeft(tree: currentTreeLeft!, forrest: forrest)
+        currentTreeLeft = nextCurrentTreeLeft
+    }
+
+    return numberOfHigherTreesAbove
+}
+
+func loadPartTwo(data: String) {
+    let rows = data
+        .split(separator: "\n")
+        .map { String($0) }
+    var rowsValues: [[Int]] = []
+    rows.forEach { row in
+        let numbers = row.charactersArray.map { Int(String($0))! }
+        rowsValues.append(numbers)
+    }
+
+    var forrest: [PartTwoTree] = []
+    for index in 0 ..< rowsValues.count {
+        for rowIndex in 0 ..< rowsValues[index].count {
+            forrest.append(PartTwoTree(value: rowsValues[index][rowIndex], x: rowIndex, y: index))
+        }
+    }
+
+    var highestValue = 0
+    forrest.forEach {
+//        print("value: \($0.value) x: \($0.x), y: \($0.y)")
+        let visibleTreesAbove = numberOfLowerTreesAbove(tree: $0, forrest: forrest)
+        let visibleTreesBelow = numberOfLowerTreesBelow(tree: $0, forrest: forrest)
+        let visibleTreesRight = numberOfLowerTreesRight(tree: $0, forrest: forrest)
+        let visibleTreesLeft = numberOfLowerTreesLeft(tree: $0, forrest: forrest)
+
+//        print("NumberOfTreesAbove: \(visibleTreesAbove)")
+//        print("NumberOfTreesBelow: \(visibleTreesBelow)")
+//        print("NumberOfTreesRight: \(visibleTreesRight)")
+//        print("NumberOfTreesLeft: \(visibleTreesLeft)")
+        let currentScenicValue = visibleTreesAbove * visibleTreesBelow * visibleTreesLeft * visibleTreesRight
+//        print("Total value: \(currentScenicValue)")
+
+        if highestValue < currentScenicValue {
+            highestValue = currentScenicValue
+            print(highestValue)
+        }
+    }
+    print("Part 2 answer: \(highestValue)")
+}
+
+loadPartTwo(data: realData)
