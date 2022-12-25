@@ -145,17 +145,37 @@ class Tree: Hashable {
     }
 }
 
+struct Coordinate: Hashable {
+
+    var x: Int
+    var y: Int
+
+    var above: Coordinate {
+        Coordinate(x: x, y: y-1)
+    }
+
+    var below: Coordinate {
+        Coordinate(x: x, y: y+1)
+    }
+
+    var right: Coordinate {
+        Coordinate(x: x+1, y: y)
+    }
+
+    var left: Coordinate {
+        Coordinate(x: x-1, y: y)
+    }
+}
+
 class PartTwoTree {
 
-    init(value: Int, x: Int, y: Int) {
+    init(value: Int, coordinate: Coordinate) {
         self.value = value
-        self.x = x
-        self.y = y
+        self.coordinate = coordinate
     }
 
     var value: Int
-    var x: Int
-    var y: Int
+    var coordinate: Coordinate
 }
 
 var visibleTrees: Set<Tree> = []
@@ -309,27 +329,10 @@ func loadPartOne(data: String) {
 
 //loadPartOne(data: realData)
 
-func treeAbove(tree: PartTwoTree, forrest: [PartTwoTree]) -> PartTwoTree? {
-    forrest.first(where: { $0.y == (tree.y - 1) && $0.x == tree.x })
-}
-
-func treeBelow(tree: PartTwoTree, forrest: [PartTwoTree]) -> PartTwoTree? {
-    forrest.first(where: { $0.y == (tree.y + 1) && $0.x == tree.x })
-}
-
-func treeRight(tree: PartTwoTree, forrest: [PartTwoTree]) -> PartTwoTree? {
-    forrest.first(where: { $0.y == tree.y && $0.x == (tree.x + 1) })
-}
-
-func treeLeft(tree: PartTwoTree, forrest: [PartTwoTree]) -> PartTwoTree? {
-    forrest.first(where: { $0.y == tree.y && $0.x == (tree.x - 1) })
-}
-
-
-func numberOfLowerTreesAbove(tree: PartTwoTree, forrest: [PartTwoTree]) -> Int {
+func numberOfLowerTreesAbove(tree: PartTwoTree, forrest: [Coordinate: PartTwoTree]) -> Int {
 
     var startTree = tree
-    var currentTreeAbove = treeAbove(tree: startTree, forrest: forrest)
+    var currentTreeAbove = forrest[tree.coordinate.above]
     var numberOfHigherTreesAbove = 0
 
     while currentTreeAbove != nil {
@@ -338,66 +341,61 @@ func numberOfLowerTreesAbove(tree: PartTwoTree, forrest: [PartTwoTree]) -> Int {
         guard currentTreeAbove!.value < startTree.value else {
             break
         }
-        var nextCurrentTreeAbove = treeAbove(tree: currentTreeAbove!, forrest: forrest)
+        var nextCurrentTreeAbove = forrest[(currentTreeAbove?.coordinate.above)!]
         currentTreeAbove = nextCurrentTreeAbove
     }
 
     return numberOfHigherTreesAbove
 }
 
-func numberOfLowerTreesBelow(tree: PartTwoTree, forrest: [PartTwoTree]) -> Int {
+func numberOfLowerTreesBelow(tree: PartTwoTree, forrest: [Coordinate: PartTwoTree]) -> Int {
 
     var startTree = tree
-    var currentTreeBelow = treeBelow(tree: startTree, forrest: forrest)
+    var currentTreeBelow = forrest[tree.coordinate.below]
     var numberOfHigherTreesAbove = 0
 
     while currentTreeBelow != nil {
         numberOfHigherTreesAbove += 1
-//        print("Current value: \(currentTreeBelow!.value) Start Value: \(startTree.value)")
         guard currentTreeBelow!.value < startTree.value else {
-//            print("break")
             break
         }
-        var nextCurrentTreeBelow = treeBelow(tree: currentTreeBelow!, forrest: forrest)
-//        print(nextCurrentTreeBelow?.value ?? "NO TREE")
+        var nextCurrentTreeBelow = forrest[(currentTreeBelow?.coordinate.below)!]
         currentTreeBelow = nextCurrentTreeBelow
     }
 
     return numberOfHigherTreesAbove
 }
 
-func numberOfLowerTreesRight(tree: PartTwoTree, forrest: [PartTwoTree]) -> Int {
+func numberOfLowerTreesRight(tree: PartTwoTree, forrest: [Coordinate: PartTwoTree]) -> Int {
 
     var startTree = tree
-    var currentTreeRight = treeRight(tree: startTree, forrest: forrest)
+    var currentTreeRight = forrest[tree.coordinate.right]
     var numberOfHigherTreesAbove = 0
 
     while currentTreeRight != nil {
         numberOfHigherTreesAbove += 1
-//        print("Current value: \(currentTreeBelow!.value) Start Value: \(startTree.value)")
         guard currentTreeRight!.value < startTree.value else {
             break
         }
-        var nextCurrentTreeRight = treeRight(tree: currentTreeRight!, forrest: forrest)
+        var nextCurrentTreeRight = forrest[(currentTreeRight?.coordinate.right)!]
         currentTreeRight = nextCurrentTreeRight
     }
 
     return numberOfHigherTreesAbove
 }
 
-func numberOfLowerTreesLeft(tree: PartTwoTree, forrest: [PartTwoTree]) -> Int {
+func numberOfLowerTreesLeft(tree: PartTwoTree, forrest: [Coordinate: PartTwoTree]) -> Int {
 
     var startTree = tree
-    var currentTreeLeft = treeLeft(tree: startTree, forrest: forrest)
+    var currentTreeLeft = forrest[tree.coordinate.left]
     var numberOfHigherTreesAbove = 0
 
     while currentTreeLeft != nil {
         numberOfHigherTreesAbove += 1
-//        print("Current value: \(currentTreeLeft!.value) Start Value: \(startTree.value)")
         guard currentTreeLeft!.value < startTree.value else {
             break
         }
-        var nextCurrentTreeLeft = treeLeft(tree: currentTreeLeft!, forrest: forrest)
+        var nextCurrentTreeLeft = forrest[(currentTreeLeft?.coordinate.left)!]
         currentTreeLeft = nextCurrentTreeLeft
     }
 
@@ -414,27 +412,23 @@ func loadPartTwo(data: String) {
         rowsValues.append(numbers)
     }
 
-    var forrest: [PartTwoTree] = []
+    var forrest = [Coordinate: PartTwoTree]()
     for index in 0 ..< rowsValues.count {
         for rowIndex in 0 ..< rowsValues[index].count {
-            forrest.append(PartTwoTree(value: rowsValues[index][rowIndex], x: rowIndex, y: index))
+            let coordinate = Coordinate(x: rowIndex, y: index)
+            let tree = PartTwoTree(value: rowsValues[index][rowIndex], coordinate: coordinate)
+            forrest[coordinate] = tree
         }
     }
 
     var highestValue = 0
-    forrest.forEach {
-//        print("value: \($0.value) x: \($0.x), y: \($0.y)")
-        let visibleTreesAbove = numberOfLowerTreesAbove(tree: $0, forrest: forrest)
-        let visibleTreesBelow = numberOfLowerTreesBelow(tree: $0, forrest: forrest)
-        let visibleTreesRight = numberOfLowerTreesRight(tree: $0, forrest: forrest)
-        let visibleTreesLeft = numberOfLowerTreesLeft(tree: $0, forrest: forrest)
+    forrest.forEach { key, value in
+        let visibleTreesAbove = numberOfLowerTreesAbove(tree: value, forrest: forrest)
+        let visibleTreesBelow = numberOfLowerTreesBelow(tree: value, forrest: forrest)
+        let visibleTreesRight = numberOfLowerTreesRight(tree: value, forrest: forrest)
+        let visibleTreesLeft = numberOfLowerTreesLeft(tree: value, forrest: forrest)
 
-//        print("NumberOfTreesAbove: \(visibleTreesAbove)")
-//        print("NumberOfTreesBelow: \(visibleTreesBelow)")
-//        print("NumberOfTreesRight: \(visibleTreesRight)")
-//        print("NumberOfTreesLeft: \(visibleTreesLeft)")
         let currentScenicValue = visibleTreesAbove * visibleTreesBelow * visibleTreesLeft * visibleTreesRight
-//        print("Total value: \(currentScenicValue)")
 
         if highestValue < currentScenicValue {
             highestValue = currentScenicValue
