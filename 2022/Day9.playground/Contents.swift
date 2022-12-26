@@ -2018,6 +2018,19 @@ L 5
 R 2
 """
 
+struct Coordinate: Hashable {
+
+    var x: Int
+    var y: Int
+}
+
+struct Player {
+
+    var coordinate: Coordinate
+}
+
+var visitedCoordinates: Set<Coordinate> = []
+
 enum Direction {
 
     case up
@@ -2053,11 +2066,29 @@ struct Move {
 
 func parse(_ input: String) {
 
-    input
+    var head = Player(coordinate: Coordinate(x: 0, y: 0))
+    var tail = Player(coordinate: Coordinate(x: 0, y: 0))
+
+    let moves = input
         .split(separator: "\n")
         .map { String($0) }
         .map { Move(row: $0) }
-        
+
+    moves.forEach {
+        for _ in 1...$0.value {
+            switch $0.direction {
+            case .right:
+                head.coordinate.x += 1
+            case .left:
+                head.coordinate.x -= 1
+            case .up:
+                head.coordinate.y += 1
+            case .down:
+                head.coordinate.y -= 1
+            }
+            print("Head x: \(head.coordinate.x) y: \(head.coordinate.y)")
+        }
+    }
 }
 
 parse(sampleData)
