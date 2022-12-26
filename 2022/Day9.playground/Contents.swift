@@ -2017,11 +2017,71 @@ D 1
 L 5
 R 2
 """
+enum Direction {
+
+    case up
+    case down
+    case right
+    case left
+}
 
 struct Coordinate: Hashable {
 
     var x: Int
     var y: Int
+
+    func moveRight() -> Coordinate {
+        Coordinate(x: self.x + 1, y: self.y)
+    }
+
+    func moveLeft() -> Coordinate {
+        Coordinate(x: self.x - 1, y: self.y)
+    }
+
+    func moveUp() -> Coordinate {
+        Coordinate(x: self.x, y: self.y + 1)
+    }
+
+    func moveDown() -> Coordinate {
+        Coordinate(x: self.x, y: self.y - 1)
+    }
+
+    func isRightOfCoordinate(_ coordinate: Coordinate) -> Bool {
+        self.x - coordinate.x > 1 && self.y == coordinate.y
+    }
+
+    func isLeftOfCoordinate(_ coordinate: Coordinate) -> Bool {
+        self.x - coordinate.x < -1 && self.y == coordinate.y
+    }
+
+    func isAboveCoordinate(_ coordinate: Coordinate) -> Bool {
+        self.x == coordinate.x && self.y < coordinate.y + 1
+    }
+
+    func isBelowCoordinate(_ coordinate: Coordinate) -> Bool {
+        self.x == coordinate.x && self.y < coordinate.y - 1
+    }
+
+
+    func distanceTo(coordinate: Coordinate) -> Coordinate {
+        if isRightOfCoordinate(coordinate) {
+            return moveRight()
+        }
+
+        if isLeftOfCoordinate(coordinate) {
+            return moveLeft()
+        }
+
+        if isAboveCoordinate(coordinate) {
+            return moveUp()
+        }
+
+        if isBelowCoordinate(coordinate) {
+            return moveDown()
+        }
+
+        return self
+    }
 }
 
 struct Player {
@@ -2030,14 +2090,6 @@ struct Player {
 }
 
 var visitedCoordinates: Set<Coordinate> = []
-
-enum Direction {
-
-    case up
-    case down
-    case right
-    case left
-}
 
 extension String {
 
@@ -2078,15 +2130,17 @@ func parse(_ input: String) {
         for _ in 1...$0.value {
             switch $0.direction {
             case .right:
-                head.coordinate.x += 1
+                head.coordinate = head.coordinate.moveRight()
             case .left:
-                head.coordinate.x -= 1
+                head.coordinate = head.coordinate.moveLeft()
             case .up:
-                head.coordinate.y += 1
+                head.coordinate = head.coordinate.moveUp()
             case .down:
-                head.coordinate.y -= 1
+                head.coordinate = head.coordinate.moveDown()
             }
             print("Head x: \(head.coordinate.x) y: \(head.coordinate.y)")
+            tail.coordinate = head.coordinate.distanceTo(coordinate: tail.coordinate)
+            print("Tail x: \(tail.coordinate.x) y: \(tail.coordinate.y)")
         }
     }
 }
