@@ -2087,15 +2087,15 @@ struct Coordinate: Hashable {
     }
 
     func isDiagonalBottomRight(_ coordinate: Coordinate) -> Bool {
-        isRightOfCoordinate(coordinate) && isBelowCoordinate(coordinate)
+        coordinate.x - self.x > 0 && coordinate.y - self.y < -1
     }
 
     func isDiagonalTopLeft(_ coordinate: Coordinate) -> Bool {
-        isRightOfCoordinate(coordinate) && isAboveCoordinate(coordinate)
+        coordinate.x - self.x < 0 && coordinate.y - self.y > 1
     }
 
     func isDiagonalBottomLeft(_ coordinate: Coordinate) -> Bool {
-        isRightOfCoordinate(coordinate) && isBelowCoordinate(coordinate)
+        coordinate.x - self.x < 0 && coordinate.y - self.y < -1
     }
 
 
@@ -2137,7 +2137,16 @@ struct Coordinate: Hashable {
 
 struct Player {
 
-    var coordinate: Coordinate
+    var coordinate: Coordinate {
+        didSet {
+            moves.insert(coordinate)
+        }
+    }
+
+    var numberOfMoves: Int {
+        moves.count
+    }
+    var moves: Set<Coordinate> = []
 }
 
 var visitedCoordinates: Set<Coordinate> = []
@@ -2195,6 +2204,7 @@ func parse(_ input: String) {
             print("Tail x: \(tail.coordinate.x) y: \(tail.coordinate.y)")
         }
     }
+    print("Tail moves: \(tail.numberOfMoves)")
 }
 
 parse(sampleData)
