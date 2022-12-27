@@ -2067,35 +2067,67 @@ struct Coordinate: Hashable {
     }
 
     func isRightOfCoordinate(_ coordinate: Coordinate) -> Bool {
-        coordinate.x - self.x > 1 && self.y == coordinate.y
+        let value = coordinate.x - self.x > 1 && self.y == coordinate.y
+        if value {
+            print("Is right")
+        }
+        return value
     }
 
     func isLeftOfCoordinate(_ coordinate: Coordinate) -> Bool {
-        coordinate.x - self.x < -1 && self.y == coordinate.y
+        let value = coordinate.x - self.x < -1 && self.y == coordinate.y
+        if value {
+            print("Is left")
+        }
+        return value
     }
 
     func isAboveCoordinate(_ coordinate: Coordinate) -> Bool {
-        self.x == coordinate.x && coordinate.y - self.y > 1
+        let value = self.x == coordinate.x && coordinate.y - self.y > 1
+        if value {
+            print("Is above")
+        }
+        return value
     }
 
     func isBelowCoordinate(_ coordinate: Coordinate) -> Bool {
-        self.x == coordinate.x && coordinate.y - self.y < -1
+        let value = self.x == coordinate.x && coordinate.y - self.y < -1
+        if value {
+            print("Is below")
+        }
+        return value
     }
 
     func isDiagonalTopRight(_ coordinate: Coordinate) -> Bool {
-        coordinate.x - self.x > 0 && coordinate.y - self.y > 1
+        let value = coordinate.x - self.x > 0 && coordinate.y - self.y > 1
+        if value {
+            print("Is diagonal top right")
+        }
+        return value
     }
 
     func isDiagonalBottomRight(_ coordinate: Coordinate) -> Bool {
-        coordinate.x - self.x > 0 && coordinate.y - self.y < -1
+        let value = coordinate.x - self.x > 0 && coordinate.y - self.y < -1
+        if value {
+            print("Is diagonal bottom right")
+        }
+        return value
     }
 
     func isDiagonalTopLeft(_ coordinate: Coordinate) -> Bool {
-        coordinate.x - self.x < 0 && coordinate.y - self.y > 1
+        let value = coordinate.x - self.x < -1 && coordinate.y - self.y > 0
+        if value {
+            print("Is diagonal top left")
+        }
+        return value
     }
 
     func isDiagonalBottomLeft(_ coordinate: Coordinate) -> Bool {
-        coordinate.x - self.x < 0 && coordinate.y - self.y < -1
+        let value = coordinate.x - self.x < 0 && coordinate.y - self.y < -1
+        if value {
+            print("Is diagonal bottom left")
+        }
+        return value
     }
 
 
@@ -2118,19 +2150,19 @@ struct Coordinate: Hashable {
         }
 
         if isRightOfCoordinate(coordinate) {
-            return moveRight()
+            moveRight()
         }
 
         if isLeftOfCoordinate(coordinate) {
-            return moveLeft()
+            moveLeft()
         }
 
         if isAboveCoordinate(coordinate) {
-            return moveUp()
+            moveUp()
         }
 
         if isBelowCoordinate(coordinate) {
-            return moveDown()
+            moveDown()
         }
     }
 }
