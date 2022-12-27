@@ -2107,7 +2107,7 @@ struct Coordinate: Hashable {
     }
 
     func isDiagonalBottomRight(_ coordinate: Coordinate) -> Bool {
-        let value = coordinate.x - self.x > 0 && coordinate.y - self.y < -1
+        let value = coordinate.x - self.x > 1 && coordinate.y - self.y < 0
         if value {
             print("Is diagonal bottom right")
         }
@@ -2123,7 +2123,7 @@ struct Coordinate: Hashable {
     }
 
     func isDiagonalBottomLeft(_ coordinate: Coordinate) -> Bool {
-        let value = coordinate.x - self.x < 0 && coordinate.y - self.y < -1
+        let value = coordinate.x - self.x < -1 && coordinate.y - self.y < 0
         if value {
             print("Is diagonal bottom left")
         }
@@ -2237,6 +2237,15 @@ func parse(_ input: String) {
         }
     }
     print("Tail moves: \(tail.numberOfMoves)")
+    tail
+        .moves
+        .sorted(by: { lhs, rhs in
+            lhs.y > rhs.y 
+        })
+        .forEach {
+        print("x: \($0.x) y: \($0.y)")
+    }
 }
 
-parse(sampleData)
+parse(realData)
+// 4110 is too low
