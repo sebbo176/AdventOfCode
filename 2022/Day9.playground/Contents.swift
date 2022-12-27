@@ -2030,28 +2030,28 @@ struct Coordinate: Hashable {
     var x: Int
     var y: Int
 
-    func moveRight() -> Coordinate {
-        Coordinate(x: self.x + 1, y: self.y)
+    mutating func moveRight() {
+        x += 1
     }
 
-    func moveLeft() -> Coordinate {
-        Coordinate(x: self.x - 1, y: self.y)
+    mutating func moveLeft() {
+        x -= 1
     }
 
-    func moveUp() -> Coordinate {
-        Coordinate(x: self.x, y: self.y + 1)
+    mutating func moveUp() {
+        y += 1
     }
 
-    func moveDown() -> Coordinate {
-        Coordinate(x: self.x, y: self.y - 1)
+    mutating func moveDown() {
+        y -= 1
     }
 
     func isRightOfCoordinate(_ coordinate: Coordinate) -> Bool {
-        self.x - coordinate.x > 1 && self.y == coordinate.y
+        self.x - coordinate.x < 1 && self.y == coordinate.y
     }
 
     func isLeftOfCoordinate(_ coordinate: Coordinate) -> Bool {
-        self.x - coordinate.x < -1 && self.y == coordinate.y
+        self.x - coordinate.x > -1 && self.y == coordinate.y
     }
 
     func isAboveCoordinate(_ coordinate: Coordinate) -> Bool {
@@ -2059,11 +2059,11 @@ struct Coordinate: Hashable {
     }
 
     func isBelowCoordinate(_ coordinate: Coordinate) -> Bool {
-        self.x == coordinate.x && self.y < coordinate.y - 1
+        self.x == coordinate.x && self.y > coordinate.y - 1
     }
 
 
-    func distanceTo(coordinate: Coordinate) -> Coordinate {
+    mutating func follow(coordinate: Coordinate) {
         if isRightOfCoordinate(coordinate) {
             return moveRight()
         }
@@ -2079,8 +2079,6 @@ struct Coordinate: Hashable {
         if isBelowCoordinate(coordinate) {
             return moveDown()
         }
-
-        return self
     }
 }
 
@@ -2130,16 +2128,17 @@ func parse(_ input: String) {
         for _ in 1...$0.value {
             switch $0.direction {
             case .right:
-                head.coordinate = head.coordinate.moveRight()
+                head.coordinate.moveRight()
             case .left:
-                head.coordinate = head.coordinate.moveLeft()
+                head.coordinate.moveLeft()
             case .up:
-                head.coordinate = head.coordinate.moveUp()
+                head.coordinate.moveUp()
             case .down:
-                head.coordinate = head.coordinate.moveDown()
+                head.coordinate.moveDown()
             }
+            print("Direction: \($0.direction) value: \($0.value)")
             print("Head x: \(head.coordinate.x) y: \(head.coordinate.y)")
-            tail.coordinate = head.coordinate.distanceTo(coordinate: tail.coordinate)
+            tail.coordinate.follow(coordinate: head.coordinate)
             print("Tail x: \(tail.coordinate.x) y: \(tail.coordinate.y)")
         }
     }
