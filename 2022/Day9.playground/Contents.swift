@@ -2046,24 +2046,77 @@ struct Coordinate: Hashable {
         y -= 1
     }
 
+    mutating func moveTopRight() {
+        y += 1
+        x += 1
+    }
+
+    mutating func moveTopLeft() {
+        y += 1
+        x -= 1
+    }
+
+    mutating func moveBottomRight() {
+        y -= 1
+        x += 1
+    }
+
+    mutating func moveBottomLeft() {
+        y -= 1
+        x -= 1
+    }
+
     func isRightOfCoordinate(_ coordinate: Coordinate) -> Bool {
-        self.x - coordinate.x < 1 && self.y == coordinate.y
+        coordinate.x - self.x > 1 && self.y == coordinate.y
     }
 
     func isLeftOfCoordinate(_ coordinate: Coordinate) -> Bool {
-        self.x - coordinate.x > -1 && self.y == coordinate.y
+        coordinate.x - self.x < -1 && self.y == coordinate.y
     }
 
     func isAboveCoordinate(_ coordinate: Coordinate) -> Bool {
-        self.x == coordinate.x && self.y < coordinate.y + 1
+        self.x == coordinate.x && coordinate.y - self.y > 1
     }
 
     func isBelowCoordinate(_ coordinate: Coordinate) -> Bool {
-        self.x == coordinate.x && self.y > coordinate.y - 1
+        self.x == coordinate.x && coordinate.y - self.y < -1
+    }
+
+    func isDiagonalTopRight(_ coordinate: Coordinate) -> Bool {
+        coordinate.x - self.x > 0 && coordinate.y - self.y > 1
+    }
+
+    func isDiagonalBottomRight(_ coordinate: Coordinate) -> Bool {
+        isRightOfCoordinate(coordinate) && isBelowCoordinate(coordinate)
+    }
+
+    func isDiagonalTopLeft(_ coordinate: Coordinate) -> Bool {
+        isRightOfCoordinate(coordinate) && isAboveCoordinate(coordinate)
+    }
+
+    func isDiagonalBottomLeft(_ coordinate: Coordinate) -> Bool {
+        isRightOfCoordinate(coordinate) && isBelowCoordinate(coordinate)
     }
 
 
     mutating func follow(coordinate: Coordinate) {
+
+        if isDiagonalTopRight(coordinate) {
+            moveTopRight()
+        }
+
+        if isDiagonalBottomRight(coordinate) {
+            moveBottomRight()
+        }
+
+        if isDiagonalTopLeft(coordinate) {
+            moveTopLeft()
+        }
+
+        if isDiagonalBottomLeft(coordinate) {
+            moveBottomLeft()
+        }
+
         if isRightOfCoordinate(coordinate) {
             return moveRight()
         }
