@@ -2099,7 +2099,8 @@ struct Coordinate: Hashable {
     }
 
     func isDiagonalTopRight(_ coordinate: Coordinate) -> Bool {
-        let value = coordinate.x - self.x > 0 && coordinate.y - self.y > 1
+        let value = (coordinate.x - self.x > 0 && coordinate.y - self.y > 1) ||
+                    (coordinate.x - self.x > 1 && coordinate.y - self.y > 0)
         if value {
             print("Is diagonal top right")
         }
@@ -2107,7 +2108,8 @@ struct Coordinate: Hashable {
     }
 
     func isDiagonalBottomRight(_ coordinate: Coordinate) -> Bool {
-        let value = coordinate.x - self.x > 1 && coordinate.y - self.y < 0
+        let value = (coordinate.x - self.x > 1 && coordinate.y - self.y < 0) ||
+                    (coordinate.x - self.x > 0 && coordinate.y - self.y < -1)
         if value {
             print("Is diagonal bottom right")
         }
@@ -2115,7 +2117,8 @@ struct Coordinate: Hashable {
     }
 
     func isDiagonalTopLeft(_ coordinate: Coordinate) -> Bool {
-        let value = coordinate.x - self.x < -1 && coordinate.y - self.y > 0
+        let value = (coordinate.x - self.x < -1 && coordinate.y - self.y > 0) ||
+                    (coordinate.x - self.x < 0 && coordinate.y - self.y > 1)
         if value {
             print("Is diagonal top left")
         }
@@ -2123,7 +2126,8 @@ struct Coordinate: Hashable {
     }
 
     func isDiagonalBottomLeft(_ coordinate: Coordinate) -> Bool {
-        let value = coordinate.x - self.x < -1 && coordinate.y - self.y < 0
+        let value = (coordinate.x - self.x < -1 && coordinate.y - self.y < 0) ||
+                    (coordinate.x - self.x < 0 && coordinate.y - self.y < -1)
         if value {
             print("Is diagonal bottom left")
         }
@@ -2240,7 +2244,7 @@ func parse(_ input: String) {
     tail
         .moves
         .sorted(by: { lhs, rhs in
-            lhs.y > rhs.y 
+            lhs.y > rhs.y
         })
         .forEach {
         print("x: \($0.x) y: \($0.y)")
@@ -2249,3 +2253,4 @@ func parse(_ input: String) {
 
 parse(realData)
 // 4110 is too low
+// 4450 is too low
