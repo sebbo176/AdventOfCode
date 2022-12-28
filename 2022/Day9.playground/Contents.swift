@@ -2215,7 +2215,15 @@ struct Move {
 func parse(_ input: String) {
 
     var head = Player(coordinate: Coordinate(x: 0, y: 0))
-    var tail = Player(coordinate: Coordinate(x: 0, y: 0))
+    var tail1 = Player(coordinate: Coordinate(x: 0, y: 0))
+    var tail2 = Player(coordinate: Coordinate(x: 0, y: 0))
+    var tail3 = Player(coordinate: Coordinate(x: 0, y: 0))
+    var tail4 = Player(coordinate: Coordinate(x: 0, y: 0))
+    var tail5 = Player(coordinate: Coordinate(x: 0, y: 0))
+    var tail6 = Player(coordinate: Coordinate(x: 0, y: 0))
+    var tail7 = Player(coordinate: Coordinate(x: 0, y: 0))
+    var tail8 = Player(coordinate: Coordinate(x: 0, y: 0))
+    var tail9 = Player(coordinate: Coordinate(x: 0, y: 0))
 
     let moves = input
         .split(separator: "\n")
@@ -2236,21 +2244,28 @@ func parse(_ input: String) {
             }
             print("Direction: \($0.direction) value: \($0.value)")
             print("Head x: \(head.coordinate.x) y: \(head.coordinate.y)")
-            tail.coordinate.follow(coordinate: head.coordinate)
-            print("Tail x: \(tail.coordinate.x) y: \(tail.coordinate.y)")
+            tail1.coordinate.follow(coordinate: head.coordinate)
+            tail2.coordinate.follow(coordinate: tail1.coordinate)
+            tail3.coordinate.follow(coordinate: tail2.coordinate)
+            tail4.coordinate.follow(coordinate: tail3.coordinate)
+            tail5.coordinate.follow(coordinate: tail4.coordinate)
+            tail6.coordinate.follow(coordinate: tail5.coordinate)
+            tail7.coordinate.follow(coordinate: tail6.coordinate)
+            tail8.coordinate.follow(coordinate: tail7.coordinate)
+            tail9.coordinate.follow(coordinate: tail8.coordinate)
+
+//            print("Tail x: \(tail.coordinate.x) y: \(tail.coordinate.y)")
         }
     }
-    print("Tail moves: \(tail.numberOfMoves)")
-    tail
-        .moves
-        .sorted(by: { lhs, rhs in
-            lhs.y > rhs.y
-        })
-        .forEach {
-        print("x: \($0.x) y: \($0.y)")
-    }
+    print("Tail moves: \(tail9.numberOfMoves)")
+//    tail
+//        .moves
+//        .sorted(by: { lhs, rhs in
+//            lhs.y > rhs.y
+//        })
+//        .forEach {
+//        print("x: \($0.x) y: \($0.y)")
+//    }
 }
 
 parse(realData)
-// 4110 is too low
-// 4450 is too low
