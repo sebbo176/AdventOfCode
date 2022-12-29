@@ -168,9 +168,40 @@ enum Operation {
 
     var executionTime: Int {
         switch self {
-        case .add: return 2
+        case .add: return 1
         case .noop: return 0
         }
+    }
+}
+
+class CPU {
+
+    var register: Int = 1
+    var cycleCounter: Int = 0 {
+        didSet {
+            if cycleCounter%20 == 0 {
+
+            }
+        }
+    }
+    var multipleCounter = 0
+
+    func execute(operations: [Operation]) {
+
+        operations.forEach {
+            switch $0 {
+            case .add(let value):
+                cycle()
+                cycle()
+                register += value
+            case .noop:
+                cycle()
+            }
+        }
+    }
+
+    func cycle() {
+        cycleCounter += 1
     }
 }
 
@@ -181,8 +212,7 @@ func parse(data: String) {
         .split(separator: "\n")
         .map { String($0) }
         .map { Operation(rawValue: $0) }
-
-    
 }
 
 parse(data: sampleData)
+
