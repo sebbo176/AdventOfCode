@@ -383,17 +383,11 @@ class Computer {
 
     private var cycleCounter: Int = 0 {
         didSet {
-            print("register: \(register)")
-            print("cycle: \(cycleCounter)")
             if cycleCounter%numberOfPixelsPerRow == 0 {
-                // new row
                 appendPixel()
                 addNewDisplayRow()
-
             } else {
-                // current row
                 appendPixel()
-                showDisplay()
             }
         }
     }
@@ -406,12 +400,11 @@ class Computer {
     func execute(operations: [Operation]) {
 
         operations.forEach {
-            print($0)
             switch $0 {
             case .add(let value):
                 cycle()
-                cycle()
                 register += value
+                cycle()
             case .noop:
                 cycle()
             }
@@ -431,7 +424,6 @@ class Computer {
     private func appendPixel() {
         let offset = numberOfPixelsPerRow * currentRow
         display[currentRow].append(currentSprite.positionIsInSprite(position: cycleCounter - offset) ? "#" : ".")
-//        print("Added \(currentSprite.positionIsInSprite(position: cycleCounter - offset) ? "#" : ".") for register: \(register)")
     }
 
     private func addNewDisplayRow() {
@@ -441,18 +433,18 @@ class Computer {
 }
 
 
-//func parse(data: String) {
-//
-//    let operations = data
-//        .split(separator: "\n")
-//        .map { String($0) }
-//        .map { Operation(rawValue: $0) }
-//    let cpu = CPU()
-//    cpu.execute(operations: operations)
-//    print("Part one: \(cpu.multipleCounter)")
-//}
-//
-//parse(data: realData)
+func parsePart1(data: String) {
+
+    let operations = data
+        .split(separator: "\n")
+        .map { String($0) }
+        .map { Operation(rawValue: $0) }
+    let cpu = CPU()
+    cpu.execute(operations: operations)
+    print("Part one: \(cpu.multipleCounter)")
+}
+
+//parsePart1(data: realData)
 
 func parsePart2(data: String) {
 
@@ -465,4 +457,4 @@ func parsePart2(data: String) {
     computer.showDisplay()
 }
 
-parsePart2(data: sampleData)
+parsePart2(data: realData)
