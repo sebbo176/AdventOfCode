@@ -352,17 +352,117 @@ class CPU {
     }
 }
 
+struct Sprite {
 
-func parse(data: String) {
+    init(center: Int) {
+        self.center = center
+    }
+
+    let center: Int
+
+    var left: Int {
+        center - 1
+    }
+
+    var right: Int {
+        center + 1
+    }
+
+    func positionIsInSprite(position: Int) -> Bool {
+        position == center || position == left || position == right
+    }
+}
+
+class Computer {
+
+    private var register: Int = 1 {
+        didSet {
+            currentSprite = Sprite(center: register)
+        }
+    }
+
+    private var cycleCounter: Int = 0 {
+        didSet {
+            print("register: \(register)")
+            print("cycle: \(cycleCounter)")
+            if cycleCounter%numberOfPixelsPerRow == 0 {
+                // new row
+                appendPixel()
+                addNewDisplayRow()
+
+            } else {
+                // current row
+                appendPixel()
+                showDisplay()
+            }
+        }
+    }
+
+    private var display: [[String]] = [[]]
+    private var currentSprite: Sprite = Sprite(center: 1)
+    private var currentRow = 0
+    private let numberOfPixelsPerRow = 40
+
+    func execute(operations: [Operation]) {
+
+        operations.forEach {
+            print($0)
+            switch $0 {
+            case .add(let value):
+                cycle()
+                cycle()
+                register += value
+            case .noop:
+                cycle()
+            }
+        }
+    }
+
+    func showDisplay() {
+        display.forEach {
+            print($0.joined())
+        }
+    }
+
+    private func cycle() {
+        cycleCounter += 1
+    }
+
+    private func appendPixel() {
+        let offset = numberOfPixelsPerRow * currentRow
+        display[currentRow].append(currentSprite.positionIsInSprite(position: cycleCounter - offset) ? "#" : ".")
+//        print("Added \(currentSprite.positionIsInSprite(position: cycleCounter - offset) ? "#" : ".") for register: \(register)")
+    }
+
+    private func addNewDisplayRow() {
+        display.append([])
+        currentRow += 1
+    }
+}
+
+
+//func parse(data: String) {
+//
+//    let operations = data
+//        .split(separator: "\n")
+//        .map { String($0) }
+//        .map { Operation(rawValue: $0) }
+//    let cpu = CPU()
+//    cpu.execute(operations: operations)
+//    print("Part one: \(cpu.multipleCounter)")
+//}
+//
+//parse(data: realData)
+
+func parsePart2(data: String) {
 
     let operations = data
         .split(separator: "\n")
         .map { String($0) }
         .map { Operation(rawValue: $0) }
-    let cpu = CPU()
-    cpu.execute(operations: operations)
-    print("Part one: \(cpu.multipleCounter)")
+    let computer = Computer()
+    computer.execute(operations: operations)
+    computer.showDisplay()
 }
 
-parse(data: realData)
-
+parsePart2(data: sampleData)
