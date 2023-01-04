@@ -111,15 +111,29 @@ func parse(_ data: String) {
     var monkeys: [Monkey] = []
     for i in 0..<rows.count {
         if rows[i].starts(with: "Monkey") {
-            let name = rows[i][rows[i].count-2]
-            let startingOperation
-            let monkey = Monkey(
-                name: name,
-                startingItems: <#T##[Int]#>,
-                operation: <#T##(Int) -> (Int)#>,
-                Test: <#T##() -> Bool#>,
-                TrueTestMonkey: <#T##Int#>,
-                FalseTestMonkey: <#T##Int#>)
+            let index = rows[i].index(rows[i].startIndex, offsetBy: 7)
+            let name = Int(String(rows[i][index]))!
+            print(name)
+
+            let startItems = rows[i+1]
+                .split(separator: ":")
+                .map { String($0) }
+            let items = startItems.last!
+                .split(separator: ",")
+                .map { Int(String($0).trimmingCharacters(in: [" "]))! }
+            items.forEach {
+                print($0)
+            }
+
+//            let name = Int(rows[i].index(after: rows[i].count-2))
+//            let startingOperation
+//            let monkey = Monkey(
+//                name: name,
+//                startingItems: <#T##[Int]#>,
+//                operation: <#T##(Int) -> (Int)#>,
+//                Test: <#T##() -> Bool#>,
+//                TrueTestMonkey: <#T##Int#>,
+//                FalseTestMonkey: <#T##Int#>)
         }
     }
 }
