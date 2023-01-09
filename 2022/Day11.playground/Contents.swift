@@ -112,9 +112,11 @@ func parse(_ data: String) {
     for i in 0..<rows.count {
         if rows[i].starts(with: "Monkey") {
 
+            // Name
             let index = rows[i].index(rows[i].startIndex, offsetBy: 7)
             let name = Int(String(rows[i][index]))!
-//            print(name)
+
+            // Items
             let startItems = rows[i+1]
                 .split(separator: ":")
                 .map { String($0) }
@@ -122,6 +124,7 @@ func parse(_ data: String) {
                 .split(separator: ",")
                 .map { Int(String($0).trimmingCharacters(in: [" "]))! }
 
+            // Operation
             let monkeyOp: (Int) -> (Int) = { value in
                 let operationRow = rows[i + 2]
                     .split(separator: " ")
@@ -133,39 +136,30 @@ func parse(_ data: String) {
                 case "+": value += operationValue
                 default: fatalError()
                 }
-//                print(operationRow[4])
                 return value
             }
 
-            let test: (Int) -> Bool  = { value in
-                let testValue = rows[i + 2]
+
+            // TEST
+            let test: (Int) -> Bool = { value in
+                value % (rows[i + 2]
                     .split(separator: " ")
                     .map { Int(String($0)) }
-                    .last!
-                return value % testValue! == 0
+                    .last!)! == 0
             }
 
+            // True
             let trueMonkey = rows[i + 4]
                 .split(separator: " ")
                 .map { String($0) }
                 .last!
 
+            // False
             let falseMonkey = rows[i + 5]
                 .split(separator: " ")
                 .map { String($0) }
                 .last!
 
-//            print(name)
-//            print(trueMonkey)
-//            print(falseMonkey)
-//            print(monkeyOp(3))
-
-//            items.forEach {
-//                print($0)
-//            }
-
-//            let name = Int(rows[i].index(after: rows[i].count-2))
-//            let startingOperation
             let monkey = Monkey(
                 name: name,
                 startingItems: items,
