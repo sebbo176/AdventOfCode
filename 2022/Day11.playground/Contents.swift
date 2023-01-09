@@ -113,17 +113,42 @@ func parse(_ data: String) {
         if rows[i].starts(with: "Monkey") {
             let index = rows[i].index(rows[i].startIndex, offsetBy: 7)
             let name = Int(String(rows[i][index]))!
-            print(name)
-
+//            print(name)
             let startItems = rows[i+1]
                 .split(separator: ":")
                 .map { String($0) }
             let items = startItems.last!
                 .split(separator: ",")
                 .map { Int(String($0).trimmingCharacters(in: [" "]))! }
-            items.forEach {
-                print($0)
+
+            let monkeyOp: (Int) -> (Int) = { value in
+                let operationRow = rows[i + 2]
+                    .split(separator: " ")
+
+                var value = value
+                let operationValue = Int(operationRow[5]) ?? value
+                switch operationRow[4] {
+                case "*": value *= operationValue
+                case "+": value += operationValue
+                default: fatalError()
+                }
+                print(operationRow[4])
+                return value
+
+
+//                let operatorIndex = operationString.index(operationString.startIndex, offsetBy: 5)
+//                let operation = operationString[operatorIndex]
+
+//                print(operation)
+
+
             }
+
+            print(monkeyOp(3))
+
+//            items.forEach {
+//                print($0)
+//            }
 
 //            let name = Int(rows[i].index(after: rows[i].count-2))
 //            let startingOperation
