@@ -97,7 +97,7 @@ struct Monkey {
     let name: Int
     var startingItems: [Int]
     let operation: (Int) -> (Int)
-    let Test: () -> Bool
+    let Test: (Int) -> Bool
     let TrueTestMonkey: Int
     let FalseTestMonkey: Int
 }
@@ -111,6 +111,7 @@ func parse(_ data: String) {
     var monkeys: [Monkey] = []
     for i in 0..<rows.count {
         if rows[i].starts(with: "Monkey") {
+
             let index = rows[i].index(rows[i].startIndex, offsetBy: 7)
             let name = Int(String(rows[i][index]))!
 //            print(name)
@@ -132,19 +133,32 @@ func parse(_ data: String) {
                 case "+": value += operationValue
                 default: fatalError()
                 }
-                print(operationRow[4])
+//                print(operationRow[4])
                 return value
-
-
-//                let operatorIndex = operationString.index(operationString.startIndex, offsetBy: 5)
-//                let operation = operationString[operatorIndex]
-
-//                print(operation)
-
-
             }
 
-            print(monkeyOp(3))
+            let test: (Int) -> Bool  = { value in
+                let testValue = rows[i + 2]
+                    .split(separator: " ")
+                    .map { Int(String($0)) }
+                    .last!
+                return value % testValue! == 0
+            }
+
+            let trueMonkey = rows[i + 4]
+                .split(separator: " ")
+                .map { String($0) }
+                .last!
+
+            let falseMonkey = rows[i + 5]
+                .split(separator: " ")
+                .map { String($0) }
+                .last!
+
+//            print(name)
+//            print(trueMonkey)
+//            print(falseMonkey)
+//            print(monkeyOp(3))
 
 //            items.forEach {
 //                print($0)
@@ -152,15 +166,17 @@ func parse(_ data: String) {
 
 //            let name = Int(rows[i].index(after: rows[i].count-2))
 //            let startingOperation
-//            let monkey = Monkey(
-//                name: name,
-//                startingItems: <#T##[Int]#>,
-//                operation: <#T##(Int) -> (Int)#>,
-//                Test: <#T##() -> Bool#>,
-//                TrueTestMonkey: <#T##Int#>,
-//                FalseTestMonkey: <#T##Int#>)
+            let monkey = Monkey(
+                name: name,
+                startingItems: items,
+                operation: monkeyOp,
+                Test: test,
+                TrueTestMonkey: Int(trueMonkey)!,
+                FalseTestMonkey: Int(falseMonkey)!)
+            monkeys.append(monkey)
         }
     }
+    print(monkeys.first?.TrueTestMonkey)
 }
 
 parse(sampleData)
