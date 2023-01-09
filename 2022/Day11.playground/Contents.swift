@@ -92,14 +92,30 @@ Monkey 3:
     If false: throw to monkey 1
 """
 
-struct Monkey {
+class Monkey {
+
+    init(
+        name: Int,
+        startingItems: [Int],
+        operation: @escaping (Int) -> (Int),
+        test: @escaping (Int) -> Bool,
+        trueTestMonkey: Int,
+        falseTestMonkey: Int
+    ) {
+        self.name = name
+        self.startingItems = startingItems
+        self.operation = operation
+        self.test = test
+        self.trueTestMonkey = trueTestMonkey
+        self.falseTestMonkey = falseTestMonkey
+    }
 
     let name: Int
     var startingItems: [Int]
     let operation: (Int) -> (Int)
-    let Test: (Int) -> Bool
-    let TrueTestMonkey: Int
-    let FalseTestMonkey: Int
+    let test: (Int) -> Bool
+    let trueTestMonkey: Int
+    let falseTestMonkey: Int
 }
 
 func parse(_ data: String) {
@@ -136,7 +152,7 @@ func parse(_ data: String) {
                 case "+": value += operationValue
                 default: fatalError()
                 }
-                return value
+                return Int(value/3)
             }
 
 
@@ -164,13 +180,27 @@ func parse(_ data: String) {
                 name: name,
                 startingItems: items,
                 operation: monkeyOp,
-                Test: test,
-                TrueTestMonkey: Int(trueMonkey)!,
-                FalseTestMonkey: Int(falseMonkey)!)
+                test: test,
+                trueTestMonkey: Int(trueMonkey)!,
+                falseTestMonkey: Int(falseMonkey)!)
             monkeys.append(monkey)
         }
     }
-    print(monkeys.first?.TrueTestMonkey)
+
+    monkeys.forEach { monkey in
+
+        monkey.startingItems.forEach { item in
+            let newValue = monkey.operation(item)
+            print("Monkey \(monkey.name), value \(item), NewValue \(newValue)")
+
+            if monkey.test(newValue) {
+                monkeys.first(where: { $0.name == monkey.trueTestMonkey})?.startingItems.append(newValue)
+            } else {
+                monkeys.first(where: { $0.name == monkey.falseTestMonkey})?.startingItems.append(newValue)
+            }
+        }
+        monkey.startingItems.removeAll()
+    }
 }
 
 parse(sampleData)
