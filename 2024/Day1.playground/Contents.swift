@@ -1009,7 +1009,7 @@ var distance: Int = 0
 
 
 @MainActor
-func performTask() {
+func performFirstTask() {
     let tuples: [(Int, Int)] = testdata
         .split(separator: "\n")
         .compactMap { line in
@@ -1033,4 +1033,30 @@ func performTask() {
     }
 }
 
-performTask()
+@MainActor
+func performSecondTask() {
+    let tuples: [(Int, Int)] = testdata
+        .split(separator: "\n")
+        .compactMap { line in
+        let components = line.split(separator: " ", omittingEmptySubsequences: true)
+        guard components.count >= 2,
+              let first = Int(components[0]),
+              let second = Int(components[1]) else {
+            return nil
+        }
+        return (first, second)
+    }
+    
+    firstList = tuples.map { $0.0 }
+    secondList = tuples.map { $0.1 }
+  
+    var similarityScore = 0
+    firstList.forEach { firstArrayRowValue in
+        let numberOfSimilarValues = secondList.count(where: {$0 == firstArrayRowValue})
+        similarityScore += numberOfSimilarValues * firstArrayRowValue
+    }
+    print(similarityScore)
+}
+
+//performTask()
+performSecondTask()
