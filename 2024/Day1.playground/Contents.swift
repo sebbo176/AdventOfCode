@@ -1007,28 +1007,30 @@ var firstList: [Int] = []
 var secondList: [Int] = []
 var distance: Int = 0
 
+
 @MainActor
 func performTask() {
-    let allData = testdata.split(separator: "\n")
-        .map({ String($0) })
-    
-    firstList = allData
-        .map { Int(String($0.split(separator: "   ").first!))! }
-        .sorted()
-    
-    secondList = allData
-        .map { Int(String($0.split(separator: "   ").last!))! }
-        .sorted()
-
-    print(firstList.count)
-    print(secondList.count)
-    
-    for i in 0..<firstList.count-1 {
-        print("distance: \(distance) firstValue \(firstList[i]) secondValue \(secondList[i])")
-        distance += abs(secondList[i] - firstList[i])
+    let tuples: [(Int, Int)] = testdata
+        .split(separator: "\n")
+        .compactMap { line in
+        let components = line.split(separator: " ", omittingEmptySubsequences: true)
+        guard components.count >= 2,
+              let first = Int(components[0]),
+              let second = Int(components[1]) else {
+            return nil
+        }
+        return (first, second)
     }
-        
-    print(distance)
+    
+    firstList = tuples.map { $0.0 }
+    secondList = tuples.map { $0.1 }
+    
+    firstList.sort()
+    secondList.sort()
+    
+    distance = zip(firstList, secondList).reduce(0) { total, pair in
+        total + abs(pair.0 - pair.1)
+    }
 }
 
 performTask()
