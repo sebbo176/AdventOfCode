@@ -1035,27 +1035,27 @@ func performFirstTask() {
 
 @MainActor
 func performSecondTask() {
-    let tuples: [(Int, Int)] = testdata
+    var secondListFrequency: [Int: Int] = [:]
+    var firstList = [Int]()
+    
+    testdata
         .split(separator: "\n")
-        .compactMap { line in
-        let components = line.split(separator: " ", omittingEmptySubsequences: true)
-        guard components.count >= 2,
-              let first = Int(components[0]),
-              let second = Int(components[1]) else {
-            return nil
+        .forEach { line in
+            let components = line.split(separator: " ", omittingEmptySubsequences: true)
+            guard components.count >= 2,
+                  let first = Int(components[0]),
+                  let second = Int(components[1]) else {
+                return
+            }
+            firstList.append(first)
+            secondListFrequency[second, default: 0] += 1
         }
-        return (first, second)
+    
+    let similarityScore = firstList.reduce(0) { total, value in
+        total + (secondListFrequency[value] ?? 0) * value
     }
     
-    firstList = tuples.map { $0.0 }
-    secondList = tuples.map { $0.1 }
-  
-    var similarityScore = 0
-    firstList.forEach { firstArrayRowValue in
-        let numberOfSimilarValues = secondList.count(where: {$0 == firstArrayRowValue})
-        similarityScore += numberOfSimilarValues * firstArrayRowValue
-    }
-    print(similarityScore)
+    print("Similarity Score: \(similarityScore)")
 }
 
 //performTask()
