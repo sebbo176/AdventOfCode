@@ -1013,7 +1013,6 @@ let sampleData = """
 1 3 6 7 9
 """
 
-
 @MainActor
 func performFirstTask() {
     let reports = testdata
@@ -1054,5 +1053,61 @@ func performFirstTask() {
     
 }
 
-performFirstTask()
-//performSecondTask()
+func validateRow(_ reportRow: [Int]) -> Bool {
+    print(reportRow)
+    let numbersAreIncreasing = zip(reportRow, reportRow.dropFirst()).allSatisfy { $0 < $1 }
+    let numbersAreDecreasing = zip(reportRow, reportRow.dropFirst()).allSatisfy { $0 > $1 }
+    if numbersAreDecreasing && numbersAreIncreasing || !numbersAreDecreasing && !numbersAreIncreasing {
+        print("reportRow: \(reportRow) is not strictly increasing or decreasing")
+        return false
+    }
+    let numbersDoNotDifferTooMuch = zip(reportRow, reportRow.dropFirst()).allSatisfy { abs($0 - $1) <= 3 }
+    let numbersAreEqual = zip(reportRow, reportRow.dropFirst()).allSatisfy { abs($0 - $1) == 0 }
+    
+    if !numbersDoNotDifferTooMuch {
+        print("reportRow: \(reportRow) differs too much")
+        return false
+    }
+    
+    if numbersAreEqual {
+        print("reportRow: \(reportRow) has equal values")
+        return false
+    }
+    return true
+}
+
+func retryWithDampener(_ reportRow: [Int]) -> Bool {
+    for i in 0..<reportRow.count {
+        var mutableCopy = reportRow
+        mutableCopy.remove(at: i)
+        if validateRow(mutableCopy) {
+            return true
+        }
+    }
+    return false
+}
+
+@MainActor
+func performSecondTask() {
+    let reports = testdata
+        .split(separator: "\n")
+        .map {
+            $0.split(separator: " ")
+                .map {
+                    Int(String($0))!
+                }
+        }
+    
+    var validReportCount = 0
+    reports.forEach { reportRow in
+        if validateRow(reportRow) {
+            validReportCount += 1
+        } else if retryWithDampener(reportRow) {
+                validReportCount += 1
+            }
+        }
+    print("Valid report count: \(validReportCount)")
+}
+
+//performFirstTask()
+performSecondTask()
