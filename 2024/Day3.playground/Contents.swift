@@ -16,7 +16,6 @@ xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
 
 @MainActor
 func performFirstTask() {
-    
     let input = testData
     let pattern = #"\mul\((\d{1,3}),(\d{1,3})\)"#
     var answer = 0
@@ -49,8 +48,54 @@ func performFirstTask() {
 
 @MainActor
 func performSecondTask() {
+    let input = testData
+    let mulPattern = #"mul\((\d{1,3}),(\d{1,3})\)"#
+    let togglePattern = #"(do|don't)\(\)"#
+    var isMulEnabled = true
+    var answer = 0
+
+    do {
+        let toggleRegex = try NSRegularExpression(pattern: togglePattern, options: [])
+        let mulRegex = try NSRegularExpression(pattern: mulPattern, options: [])
+        
+        let toggleMatches = toggleRegex.matches(in: input, options: [], range: NSRange(input.startIndex..., in: input))
+        var toggleRanges: [NSRange] = toggleMatches.map { $0.range }
+        
+        toggleRanges.sort(by: { $0.location < $1.location })
+
+        var currentToggleIndex = 0
+        
+        let mulMatches = mulRegex.matches(in: input, options: [], range: NSRange(input.startIndex..., in: input))
+        for match in mulMatches {
+            while currentToggleIndex < toggleRanges.count && toggleRanges[currentToggleIndex].location <= match.range.location {
+                let toggleRange = toggleRanges[currentToggleIndex]
+                if let toggleInstructionRange = Range(toggleRange, in: input) {
+                    let toggleInstruction = String(input[toggleInstructionRange])
+                    isMulEnabled = toggleInstruction == "do()"
+                }
+                currentToggleIndex += 1
+            }
+
+            if isMulEnabled, match.numberOfRanges == 3,
+               let range1 = Range(match.range(at: 1), in: input),
+               let range2 = Range(match.range(at: 2), in: input) {
+                
+                let xString = input[range1]
+                let yString = input[range2]
+                
+                if let x = Int(xString), let y = Int(yString) {
+                    let product = x * y
+                    answer += product
+                    print("Found: \(x) and \(y), Product: \(product)")
+                }
+            }
+        }
+    } catch {
+        print("Invalid regex: \(error.localizedDescription)")
+    }
     
+    print("Answer: \(answer)")
 }
 
-performFirstTask()
-//performSecondTask()
+//performFirstTask()
+performSecondTask()
