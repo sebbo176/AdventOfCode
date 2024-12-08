@@ -202,12 +202,63 @@ func performFirstTask() {
     print("Number of XMAS: \(result)")
 }
 
+func findXMASShape(grid: [[Character]]) -> Int {
+    let rows = grid.count
+    let cols = grid[0].count
 
+    func isValid(_ r: Int, _ c: Int) -> Bool {
+        return r >= 0 && r < rows && c >= 0 && c < cols
+    }
+
+    func checkMASLine(r: Int, c: Int, d: (Int, Int)) -> Bool {
+        let (dr, dc) = d
+        let r1 = r + dr
+        let c1 = c + dc
+        let r2 = r - dr
+        let c2 = c - dc
+        
+        guard isValid(r1, c1), isValid(r2, c2) else { return false }
+        guard grid[r][c] == "A" else { return false }
+        
+        let ch1 = grid[r1][c1]
+        let ch2 = grid[r2][c2]
+        
+        return (ch1 == "M" && ch2 == "S") || (ch1 == "S" && ch2 == "M")
+    }
+
+    var count = 0
+    for r in 0..<rows {
+        for c in 0..<cols {
+            let diagonal1 = checkMASLine(r: r, c: c, d: (-1, -1))
+            let diagonal2 = checkMASLine(r: r, c: c, d: (-1, 1))
+            
+            if diagonal1 && diagonal2 {
+                count += 1
+            }
+        }
+    }
+    
+    return count
+}
 
 @MainActor
 func performSecondTask() {
+    let grid: [[Character]] = [
+        Array("MMMSXXMASM"),
+        Array("MSAMXMSMSA"),
+        Array("AMXSXMAAMM"),
+        Array("MSAMASMSMX"),
+        Array("XMASAMXAMM"),
+        Array("XXAMMXXAMA"),
+        Array("SMSMSASXSS"),
+        Array("SAXAMASAAA"),
+        Array("MAMMMXMMMM"),
+        Array("MXMXAXMASX")
+    ]
     
+    let result = findXMASShape(grid: testData.split(separator: "\n").map { Array($0) })
+    print("Number of X-MAS: \(result)")
 }
 
-performFirstTask()
-//performSecondTask()
+//performFirstTask()
+performSecondTask()
